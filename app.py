@@ -26,26 +26,28 @@ HTML = """
 {% endif %}
 """
 
-from datetime import datetime
+from datetime import datetime, timedelta
 
 def obtener_partidos():
+
     hoy = datetime.utcnow().strftime("%Y-%m-%d")
 
-    url = f"https://v3.football.api-sports.io/fixtures?date={hoy}"
+    url = f"https://v3.football.api-sports.io/fixtures?date={hoy}&timezone=America/Bogota"
     headers = {"x-apisports-key": os.environ.get("API_KEY")}
-    r = requests.get(url, headers=headers, timeout=20)
+
+    r = requests.get(url, headers=headers, timeout=8)
     data = r.json()
 
     ligas = {}
 
-    for f in data["response"]:
+    for f in data.get("response", [])[:150]:   # limite para que no se bloquee
         liga = f["league"]["country"] + " - " + f["league"]["name"]
         partido = f"{f['teams']['home']['name']} vs {f['teams']['away']['name']}"
 
-        if liga not in ligas:
-            ligas[liga] = []
+        ligas.setdefault(liga, []).append(partido)
 
-        ligas[liga].append(partido)
+    if not ligas:
+        ligas = {"Sin datos": ["La API no devolvió partidos hoy"]}
 
     return ligas
 @app.route("/", methods=["GET","POST"])

@@ -21,8 +21,12 @@ HTML = """
 {% endif %}
 """
 
+from datetime import datetime
+
 def obtener_partidos():
-    url = "https://v3.football.api-sports.io/fixtures?next=20"
+    hoy = datetime.utcnow().strftime("%Y-%m-%d")
+
+    url = f"https://v3.football.api-sports.io/fixtures?date={hoy}"
     headers = {"x-apisports-key": os.environ.get("API_KEY")}
     r = requests.get(url, headers=headers, timeout=20)
     data = r.json()
@@ -34,7 +38,10 @@ def obtener_partidos():
         away = f["teams"]["away"]["name"]
         liga = f["league"]["name"]
 
-        partidos.append(f"{home} vs {away}  ({liga})")
+        partidos.append(f"{home} vs {away} ({liga})")
+
+    if not partidos:
+        partidos = ["Hoy no hay partidos disponibles en la API"]
 
     return partidos
 

@@ -1,5 +1,4 @@
 from flask import Flask, render_template_string
-import requests
 
 app = Flask(__name__)
 
@@ -11,34 +10,26 @@ HTML = """
 </form>
 
 {% if partidos %}
-<h2>Partidos de hoy</h2>
+<h2>Partidos de ejemplo</h2>
 <ul>
 {% for p in partidos %}
-<li>{{p['homeTeam']['name']}} vs {{p['awayTeam']['name']}}</li>
+<li>{{p[0]}} vs {{p[1]}}</li>
 {% endfor %}
 </ul>
 {% endif %}
 """
 
-API_KEY = "demo"   # luego pondremos la real
-
 @app.route("/", methods=["GET","POST"])
 def inicio():
-    partidos = None
-
-    try:
-        url = "https://api.football-data.org/v4/matches"
-        headers = {"X-Auth-Token": API_KEY}
-        r = requests.get(url, headers=headers)
-        data = r.json()
-        partidos = data.get("matches", [])[:10]
-    except:
-        partidos = [{"homeTeam":{"name":"Error cargando datos"}, "awayTeam":{"name":"—"}}]
-
+    partidos = [
+        ("Real Madrid","Barcelona"),
+        ("Liverpool","Chelsea"),
+        ("Bayern","Dortmund"),
+        ("PSG","Monaco")
+    ]
     return render_template_string(HTML, partidos=partidos)
 
 import os
-
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 10000))
     app.run(host="0.0.0.0", port=port)

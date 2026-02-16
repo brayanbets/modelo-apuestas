@@ -1,7 +1,7 @@
 from flask import Flask, render_template_string
 import requests
 
-app = Flask(_name_)
+app = Flask(__name__)
 
 HTML = """
 <h1>⚽ Modelo de Apuestas</h1>

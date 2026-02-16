@@ -33,8 +33,6 @@ HTML = """
 """
 
 def obtener_partidos_futbol(market):
-    # usa tu API actual para partidos del día
-    # aquí se puede agregar cálculo Poisson o heurística simple
     headers = {"x-apisports-key": os.environ.get("API_KEY")}
     hoy = datetime.utcnow().strftime("%Y-%m-%d")
     
@@ -43,15 +41,24 @@ def obtener_partidos_futbol(market):
     data = r.json()
 
     ligas = {}
+    season = 2025  # ajusta según temporada actual
+
     for f in data.get("response", []):
         liga = f"{f['league']['country']} - {f['league']['name']}"
         home = f['teams']['home']['name']
         away = f['teams']['away']['name']
-        # Aquí puedes aplicar lógica Poisson simple
+        home_id = f['teams']['home']['id']
+        away_id = f['teams']['away']['id']
+        league_id = f['league']['id']
+
+        # Promedios reales usando API
+        goals_home, _ = obtener_promedios_goals(home_id, league_id, season)
+        goals_away, _ = obtener_promedios_goals(away_id, league_id, season)
+
         if market == "over":
-            prob = "Over 2.5: 65%"  # ejemplo
+            prob = f"Over 2.5: {prob_over_2_5(goals_home, goals_away)}%"
         else:
-            prob = "BTTS: 55%"     # ejemplo
+            prob = f"BTTS: {prob_btts(goals_home, goals_away)}%"
 
         partido = f"{home} vs {away} | {prob}"
         ligas.setdefault(liga, []).append(partido)
@@ -59,6 +66,19 @@ def obtener_partidos_futbol(market):
     if not ligas:
         ligas = {"Sin datos": ["No hay partidos hoy"]}
     return ligas
+    def obtener_promedios_goals(team_id, league_id, season):
+    headers = {"x-apisports-key": os.environ.get("API_KEY")}
+    url = f"https://v3.football.api-sports.io/teams/statistics?league={league_id}&season={season}&team={team_id}"
+    r = requests.get(url, headers=headers, timeout=10)
+    data = r.json()
+
+    if "response" in data and data["response"]:
+        stats = data["response"]
+        goals_for = stats["goals"]["for"]["total"]["average"]
+        goals_against = stats["goals"]["against"]["total"]["average"]
+        return float(goals_for), float(goals_against)
+    else:
+        return 1.5, 1.2  # fallback
     def obtener_partidos_basket():
     # ejemplo con API gratuita balldontlie.io
     url = "https://www.balldontlie.io/api/v1/games?per_page=10"

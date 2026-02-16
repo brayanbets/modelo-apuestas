@@ -1,4 +1,4 @@
-from flask import Flask, render_template_string
+from flask import Flask, render_template_string, request
 import requests
 import os
 
@@ -50,11 +50,13 @@ def obtener_partidos():
     return ligas
 @app.route("/", methods=["GET","POST"])
 def inicio():
-    partidos = None
-    try:
-        partidos = obtener_partidos()
-    except Exception as e:
-        partidos = [f"Error cargando datos: {e}"]
+    partidos = {}
+
+    if request.method == "POST":
+        try:
+            partidos = obtener_partidos()
+        except Exception as e:
+            partidos = {"Error": [str(e)]}
 
     return render_template_string(HTML, partidos=partidos)
 

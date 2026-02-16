@@ -8,16 +8,21 @@ HTML = """
 <h1>⚽ Modelo de Apuestas</h1>
 
 <form method="post">
-    <button type="submit">Buscar partidos con goles</button>
+    <button type="submit">Buscar partidos</button>
 </form>
 
 {% if partidos %}
-<h2>Partidos recomendados (+2.5 goles)</h2>
+<h2>Partidos de hoy</h2>
+
+{% for liga, lista in partidos.items() %}
+<h3>{{liga}}</h3>
 <ul>
-{% for p in partidos %}
+{% for p in lista %}
 <li>{{p}}</li>
 {% endfor %}
 </ul>
+{% endfor %}
+
 {% endif %}
 """
 
@@ -31,20 +36,18 @@ def obtener_partidos():
     r = requests.get(url, headers=headers, timeout=20)
     data = r.json()
 
-    partidos = []
+    ligas = {}
 
     for f in data["response"]:
-        home = f["teams"]["home"]["name"]
-        away = f["teams"]["away"]["name"]
-        liga = f["league"]["name"]
+        liga = f["league"]["country"] + " - " + f["league"]["name"]
+        partido = f"{f['teams']['home']['name']} vs {f['teams']['away']['name']}"
 
-        partidos.append(f"{home} vs {away} ({liga})")
+        if liga not in ligas:
+            ligas[liga] = []
 
-    if not partidos:
-        partidos = ["Hoy no hay partidos disponibles en la API"]
+        ligas[liga].append(partido)
 
-    return partidos
-
+    return ligas
 @app.route("/", methods=["GET","POST"])
 def inicio():
     partidos = None

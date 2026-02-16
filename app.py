@@ -26,32 +26,39 @@ HTML = """
 {% endif %}
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 def obtener_partidos():
 
     headers = {"x-apisports-key": os.environ.get("API_KEY")}
+    hoy = datetime.utcnow().strftime("%Y-%m-%d")
 
-    fechas = [
-        datetime.utcnow().strftime("%Y-%m-%d"),
-        (datetime.utcnow() + timedelta(days=1)).strftime("%Y-%m-%d")
+    # ligas ofensivas (muchos goles)
+    ligas_ids = [
+        39,   # Premier League
+        140,  # La Liga
+        78,   # Bundesliga
+        135,  # Serie A
+        61,   # Ligue 1
+        88,   # Netherlands
+        179,  # Norway
+        113   # Sweden
     ]
 
     ligas = {}
 
-    for fecha in fechas:
-        url = f"https://v3.football.api-sports.io/fixtures?date={fecha}&timezone=America/Bogota"
+    for liga_id in ligas_ids:
+        url = f"https://v3.football.api-sports.io/fixtures?league={liga_id}&date={hoy}&timezone=America/Bogota"
         r = requests.get(url, headers=headers, timeout=8)
         data = r.json()
 
-        for f in data.get("response", [])[:200]:
-            liga = f["league"]["country"] + " - " + f["league"]["name"]
+        for f in data.get("response", []):
+            liga = f["league"]["name"]
             partido = f"{f['teams']['home']['name']} vs {f['teams']['away']['name']}"
-
             ligas.setdefault(liga, []).append(partido)
 
     if not ligas:
-        ligas = {"Sin datos": ["No hay partidos hoy ni mañana en la API"]}
+        ligas = {"Sin datos": ["La API gratuita solo permite ligas cuando hay jornada activa"]}
 
     return ligas
 @app.route("/", methods=["GET","POST"])

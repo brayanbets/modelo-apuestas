@@ -31,28 +31,26 @@ from datetime import datetime, timedelta
 def obtener_partidos():
 
     headers = {"x-apisports-key": os.environ.get("API_KEY")}
-
-    ligas_ids = [39,140,78,135,61,88,179,113]
     ligas = {}
 
-    for i in range(5):  # busca hoy + 4 días
+    for i in range(7):  # buscar hasta 1 semana
         fecha = (datetime.utcnow() + timedelta(days=i)).strftime("%Y-%m-%d")
 
-        for liga_id in ligas_ids:
-            url = f"https://v3.football.api-sports.io/fixtures?league={liga_id}&date={fecha}&timezone=America/Bogota"
-            r = requests.get(url, headers=headers, timeout=8)
-            data = r.json()
+        url = f"https://v3.football.api-sports.io/fixtures?date={fecha}&timezone=America/Bogota"
+        r = requests.get(url, headers=headers, timeout=10)
+        data = r.json()
 
-            for f in data.get("response", []):
-                liga = f["league"]["name"] + f" ({fecha})"
-                partido = f"{f['teams']['home']['name']} vs {f['teams']['away']['name']}"
-                ligas.setdefault(liga, []).append(partido)
+        for f in data.get("response", []):
+            pais = f["league"]["country"]
+            liga = f"{pais} - {f['league']['name']} ({fecha})"
+            partido = f"{f['teams']['home']['name']} vs {f['teams']['away']['name']}"
+            ligas.setdefault(liga, []).append(partido)
 
-        if ligas:  # si ya encontró partidos, parar
+        if ligas:
             break
 
     if not ligas:
-        ligas = {"Sin datos": ["No hay partidos en los próximos días"]}
+        ligas = {"Sin datos": ["Tu plan gratuito no tiene partidos disponibles hoy"]}
 
     return ligas
 @app.route("/", methods=["GET","POST"])

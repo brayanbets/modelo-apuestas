@@ -27,17 +27,16 @@ def obtener_partidos():
     r = requests.get(url, headers=headers, timeout=20)
     data = r.json()
 
-    picks = []
+    partidos = []
 
     for f in data["response"]:
         home = f["teams"]["home"]["name"]
         away = f["teams"]["away"]["name"]
+        liga = f["league"]["name"]
 
-        # modelo inicial simple
-        if any(liga in f["league"]["name"].lower() for liga in ["netherlands","germany","sweden","norway"]):
-            picks.append(f"{home} vs {away}")
+        partidos.append(f"{home} vs {away}  ({liga})")
 
-    return picks
+    return partidos
 
 @app.route("/", methods=["GET","POST"])
 def inicio():

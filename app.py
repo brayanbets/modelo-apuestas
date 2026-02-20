@@ -66,7 +66,7 @@ def obtener_partidos_futbol(market):
     if not ligas:
         ligas = {"Sin datos": ["No hay partidos hoy"]}
     return ligas
-    def obtener_partidos():
+def obtener_partidos():
     headers = {
         "x-apisports-key": os.environ.get("API_KEY")
     }

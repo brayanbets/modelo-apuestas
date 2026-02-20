@@ -66,8 +66,10 @@ def obtener_partidos_futbol(market):
     if not ligas:
         ligas = {"Sin datos": ["No hay partidos hoy"]}
     return ligas
-    def obtener_promedios_goals(team_id, league_id, season):
-    headers = {"x-apisports-key": os.environ.get("API_KEY")}
+    def obtener_partidos():
+    headers = {
+        "x-apisports-key": os.environ.get("API_KEY")
+    }
     url = f"https://v3.football.api-sports.io/teams/statistics?league={league_id}&season={season}&team={team_id}"
     r = requests.get(url, headers=headers, timeout=10)
     data = r.json()

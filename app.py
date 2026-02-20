@@ -83,7 +83,7 @@ def obtener_partidos():
         return float(goals_for), float(goals_against)
     else:
         return 1.5, 1.2  # fallback
-    def obtener_partidos_basket():
+def obtener_partidos_basket():
     # ejemplo con API gratuita balldontlie.io
     url = "https://www.balldontlie.io/api/v1/games?per_page=10"
     r = requests.get(url, timeout=10)

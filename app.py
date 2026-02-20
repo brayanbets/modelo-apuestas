@@ -67,10 +67,12 @@ def obtener_partidos_futbol(market):
         ligas = {"Sin datos": ["No hay partidos hoy"]}
     return ligas
     def obtener_partidos():
-        headers = {
+    headers = {
         "x-apisports-key": os.environ.get("API_KEY")
     }
+
     url = f"https://v3.football.api-sports.io/teams/statistics?league={league_id}&season={season}&team={team_id}"
+    
     r = requests.get(url, headers=headers, timeout=10)
     data = r.json()
 
